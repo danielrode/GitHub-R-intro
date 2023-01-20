@@ -1,0 +1,126 @@
+---
+title: "Main"
+author: "Daniel Rode"
+date: "1/20/2023"
+output: html_document
+---
+
+
+```{r}
+source("setup.R")
+```
+
+
+# Exercises 6.3.1
+
+## Exercise 1
+```{r}
+# create myList list
+myList <- list("apple", 1993, FALSE, penguins)
+list(myList, list("more stuff here", list("and more")))
+names(myList) <- c("fruit", "year", "logic", "data")
+
+
+# error:
+myList["Fruit"]
+# fix:
+myList[["fruit"]]
+
+# error:
+penguins$flipper_lenght_mm
+# fix:
+penguins$flipper_length_mm
+
+# error: 
+penguins[island=='Dream',]
+# fix:
+penguins[penguins$island=='Dream',]
+```
+
+
+
+## Exercise 2
+There are 3 species of penguins in the `penguins` dataset, as determined by:
+
+```{r}
+length(unique(penguins$species))
+```
+
+
+## Exercise 3
+Pruning `penguins` to species, island, and flipper_length_mm columns:
+
+```{r}
+penguins %>%
+  select(species, island, flipper_length_mm) %>%
+  filter(island=='Dream')
+```
+
+
+## Exercise 4
+Mean flipper length of the *Adelie* species is 190 mm, as determined by:
+
+```{r}
+penguins[penguins$species=='Adelie',]$flipper_length_mm %>% 
+  mean(na.rm=TRUE)
+```
+
+
+# Exercises 6.3.2
+
+## Exercise 1
+> Reorder the variables in penguins so that year is the first column followed by the rest (Hint: look into the use of everything()).
+
+```{r}
+year_col = select(penguins, year)
+remaining_cols = select(penguins, -year)
+penguins = mutate(year_col, remaining_cols)
+
+# probably could have just used relocate()
+```
+
+
+## Exercise 2
+> Create a new column called ‘size_group’ where individuals with body mass greater than the overall average are called ‘large’ and those smaller are called ‘small’.
+
+```{r}
+avg_mass = mean(penguins$body_mass_g, na.rm=TRUE)
+
+# mutate based on conditional statements
+penguins = penguins %>% 
+  mutate(
+    size_group = if_else(
+      body_mass_g < avg_mass, 
+      "small", "large"
+  )
+)
+```
+
+
+## Exercise 3
+> Find out which year for each species were individuals on average the largest according to body mass.
+
+```{r}
+years = unique(penguins$year)
+for(i in 1:length(years)) {
+  yr = years[i]
+  print(yr)
+}
+# the code above is not used to solve a problem, but it will remind me how to iterate/loop
+```
+
+Individuals of the *Adelie* species were largest (on average) during 2008 (within the span of the given dataset). For *Chinstrap*, the year was 2008, and for *Gentoo*, the year was 2009. See:
+```{r}
+penguins %>%
+  group_by(year, species) %>%
+  summarise(mean_mass = mean(body_mass_g, na.rm=TRUE))
+```
+
+
+## Exercise 4
+> You want to filter data for years that are not in a vector of given years, but this code doesn’t work. Tweak it so that it does. (Yes, you could just filter year to equal 2007 in this case but there is a trouble-shooting lessons here).
+
+```{r}
+penguins %>% 
+  filter(!year %in% c(2008, 2009))
+```
