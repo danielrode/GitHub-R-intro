@@ -1,5 +1,5 @@
 ---
-title: "Main"
+title: "Week 01 - Intro to Environmental Data Science in R"
 author: "Daniel Rode"
 date: "1/20/2023"
 output: html_document
@@ -11,9 +11,7 @@ source("setup.R")
 ```
 
 
-# Exercises 6.3.1
-
-## Exercise 1
+# Exercise 6.3.1 - 1
 ```{r}
 # create myList list
 myList <- list("apple", 1993, FALSE, penguins)
@@ -38,8 +36,7 @@ penguins[penguins$island=='Dream',]
 ```
 
 
-
-## Exercise 2
+# Exercise 6.3.1 - 2
 There are 3 species of penguins in the `penguins` dataset, as determined by:
 
 ```{r}
@@ -47,7 +44,7 @@ length(unique(penguins$species))
 ```
 
 
-## Exercise 3
+# Exercise 6.3.1 - 3
 Pruning `penguins` to species, island, and flipper_length_mm columns:
 
 ```{r}
@@ -57,7 +54,7 @@ penguins %>%
 ```
 
 
-## Exercise 4
+# Exercise 6.3.1 - 4
 Mean flipper length of the *Adelie* species is 190 mm, as determined by:
 
 ```{r}
@@ -66,9 +63,7 @@ penguins[penguins$species=='Adelie',]$flipper_length_mm %>%
 ```
 
 
-# Exercises 6.3.2
-
-## Exercise 1
+# Exercise 6.3.2 - 1
 > Reorder the variables in penguins so that year is the first column followed by the rest (Hint: look into the use of everything()).
 
 ```{r}
@@ -80,7 +75,7 @@ penguins = mutate(year_col, remaining_cols)
 ```
 
 
-## Exercise 2
+# Exercise 6.3.2 - 2
 > Create a new column called ‘size_group’ where individuals with body mass greater than the overall average are called ‘large’ and those smaller are called ‘small’.
 
 ```{r}
@@ -97,7 +92,7 @@ penguins = penguins %>%
 ```
 
 
-## Exercise 3
+# Exercise 6.3.2 - 3
 > Find out which year for each species were individuals on average the largest according to body mass.
 
 ```{r}
@@ -117,10 +112,60 @@ penguins %>%
 ```
 
 
-## Exercise 4
+# Exercise 6.3.2 - 4
 > You want to filter data for years that are not in a vector of given years, but this code doesn’t work. Tweak it so that it does. (Yes, you could just filter year to equal 2007 in this case but there is a trouble-shooting lessons here).
 
 ```{r}
 penguins %>% 
   filter(!year %in% c(2008, 2009))
+```
+
+
+# Exercise 7.1 - 1
+
+```{r}
+library(ggplot2)
+library(showtext)
+
+showtext_auto()  # Fixes font issues on Linux
+
+# the harder way:
+# penguins %>%
+#   group_by(species) %>%
+#   rename_at("species", ~"Species") %>%  # Rename column on the fly
+#   summarise(
+#     "Mean Flipper Length (mm)" = mean(
+#       flipper_length_mm,
+#       na.rm=TRUE
+#       )
+#     ) %>% 
+#   ggplot() +
+#   geom_bar(mapping = aes(x = `Mean Flipper Length (mm)`, fill = Species))
+
+ggplot(penguins) +
+  geom_bar(
+    stat = "summary",
+    fun = "mean",
+    mapping = aes(
+      x = species,
+      y = flipper_length_mm),
+    ) +
+  labs(
+    title = "Penguins",
+    ) +
+  xlab("Species") +
+  ylab("Mean Flipper Length (mm)")
+```
+
+
+# Exercise 7.1 - 2
+
+```{r}
+penguins %>%
+  filter(island=='Dream') %>%
+  ggplot() +
+    geom_point(mapping = aes(
+      x = bill_length_mm, 
+      y = bill_depth_mm, 
+      color = species))
 ```
