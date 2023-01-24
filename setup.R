@@ -19,9 +19,14 @@ packages <- c('tidyverse',
               'rmarkdown',
               'tigris',
               'elevatr',
-              'rgdal')
+              'rgdal',
+              'showtext',
+)
 
 packageLoad(packages)
+
+
+#showtext_auto()  # Fixes font issues on Linux)
 
 
 # call this script in future assignments using `source("PATH_TO_THIS_SCRIPT")`

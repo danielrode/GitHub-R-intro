@@ -1,0 +1,80 @@
+---
+title: "Week 01 - Intro to Spatial Data in R"
+author: "Daniel Rode"
+date: "1/23/2023"
+output: html_document
+---
+
+
+```{r}
+source("setup.R")
+```
+
+
+# Exercise 1
+> Filter out the counties data set to only include Larimer, Denver, and Pueblo counties.
+
+```{r}
+counties = counties(state = "CO")
+filter(counties, NAME %in% c("Larimer", "Denver", "Pueblo"))
+```
+
+
+# Exercise 2
+> Make a map of the counties data colored by county area. Make a second map of counties colored by their total area of water.
+
+```{r}
+counties = mutate(counties, AREA = ALAND+AWATER)
+
+qtm(counties, fill = "AREA")
+
+qtm(counties, fill = "AWATER")
+```
+
+
+# Exercise 3
+> Make a barplot comparing the elevation of your 3 points in the Poudre Canyon (note: explore the extract() function in the terra package).
+
+```{r}
+# Elevation units are in meters
+elevation = get_elev_raster(counties, z = 7)
+
+# Isolate and name several locations
+poudre_points = data.frame(
+  name = c("Mishawaka", "Rustic", "Blue Lake Trailhead"),
+  long = c(-105.35634, -105.58159, -105.85563),
+  lat = c(40.68752, 40.69687, 40.57960)
+)
+poudre_points_sf = st_as_sf(poudre_points, coords = c("long", "lat"), crs = 4326)  # Convert to sf object
+
+# Extract elevation for locations isolated above, and save as column to sf object
+poudre_points_sf$elevation_m = extract(elevation, poudre_points_sf)
+
+# Plot elevations
+ggplot(
+  poudre_points_sf,
+  mapping = aes(x = name, y = elevation_m),
+  ) +
+  geom_bar(stat = "identity") +
+  labs(title = "Elevation of 3 Points in Poudre Canyon") +
+  xlab("Place") +
+  ylab("Elevation (m)")
+```
+
+
+# Exercise 4
+> Why are there 4 features in our Poudre Canyon Highway variable instead of 1?
+
+```{r}
+roads = roads(state = "CO", county = "Larimer")
+poudre_hwy = roads %>% 
+  filter(FULLNAME == "Poudre Canyon Hwy")
+
+qtm(poudre_hwy[1,])
+qtm(poudre_hwy[2,])
+qtm(poudre_hwy[3,])
+qtm(poudre_hwy[4,])
+qtm(poudre_hwy)
+```
+
+The Poudre Canyon Highway object is composed of 4 features because each of the four lines is a sub-feature of the overall highway (four line-segments that compose the overall line). In reality, I do not know (that is just a guess that is assumed by mapping each feature individually, as done above).
